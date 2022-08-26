@@ -1,0 +1,12 @@
+{
+  "name": "okra-scraper",
+  "version": "1.0.0",
+  "description": "Okra Sr. Full Stack Engineer take-home technical challenge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["Node.JS", "WebScrapping", "Puppeteer", "MongoDB"],
+  "author": "Arnold Katumba",
+  "license": "ISC"
+}

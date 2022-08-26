@@ -1,13 +1,16 @@
+const userProfile = require("./customer-profile")
+
 const scraperObject = {
     url: 'https://bankof.okra.ng/login',
 
     async scraper(browser){
         let page = await browser.newPage();
+        const auth = {email: "hijefel589@rxcay.com", password: "qwerty"};
         console.log(`Navigating to ${this.url}...`);
         await page.goto(this.url);
 
-        await page.type("#email", "hijefel589@rxcay.com");
-        await page.type("#password", "qwerty");
+        await page.type("#email", auth.email);
+        await page.type("#password", auth.password);
         await page.click("button");
 
         await page.on("dialog", async dialog => {
@@ -19,7 +22,11 @@ const scraperObject = {
         await page.type("#otp", "12345");
         await page.click("button");
 
-        // await page.goto("https://bankof.okra.ng/dashboard");
+        await page.waitForNavigation({waitUntil: "networkidle0"});
+
+        const customer = await userProfile.customerProfile(page);
+
+        page.close();
     }
 }
 

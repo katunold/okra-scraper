@@ -1,4 +1,5 @@
-const userProfile = require("./customer-profile")
+const userProfile = require("./customer-profile");
+const accounts = require("./accounts");
 
 const scraperObject = {
     url: 'https://bankof.okra.ng/login',
@@ -25,6 +26,8 @@ const scraperObject = {
         await page.waitForNavigation({waitUntil: "networkidle0"});
 
         const customer = await userProfile.customerProfile(page);
+
+        const account = await accounts.accountsData(page);
 
         page.close();
     }

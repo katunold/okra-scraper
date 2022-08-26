@@ -1,6 +1,5 @@
 async function customerProfile(page) {
     let dataObj = {};
-    // let objectKeys = ["address", "bvn", "contact", "email"];
 
     await page.waitForSelector('main')
     dataObj['customerName'] = await page.$eval('.text-2xl', text => {
@@ -13,7 +12,7 @@ async function customerProfile(page) {
     dataObj['bvn'] = bvn.split(":")[1];
     const phone = await page.$eval("main > div > h1 ~ div > p:nth-child(3)", element => element.textContent);
     dataObj['phone'] = phone.split(":")[1];
-    const email = await page.$eval("main > div > h1 ~ div > p:nth-child(3)", element => element.textContent);
+    const email = await page.$eval("main > div > h1 ~ div > p:nth-child(4)", element => element.textContent);
     dataObj['email'] = email.split(":")[1];
 
     return dataObj;

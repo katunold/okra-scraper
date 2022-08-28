@@ -1,5 +1,5 @@
 async function accountsData(page) {
-    let accountsData = await page.$$eval('main > section > section', accounts => {
+    return await page.$$eval('main > section > section', accounts => {
         accounts = accounts.map(el => {
             const accountNumber = el.querySelector('div > a').href.split("-")[1];
             const availableBalanceData = el.querySelector('div > p').textContent.split(" ");
@@ -15,8 +15,6 @@ async function accountsData(page) {
         });
         return accounts
     })
-
-    return accountsData
 }
 
 module.exports = {

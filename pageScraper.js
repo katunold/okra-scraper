@@ -1,5 +1,7 @@
 const userProfile = require("./customer-profile");
 const accounts = require("./accounts");
+const accountTransactions = require("./transactions");
+const user = require("./login");
 
 const scraperObject = {
     url: 'https://bankof.okra.ng/login',
@@ -10,26 +12,41 @@ const scraperObject = {
         console.log(`Navigating to ${this.url}...`);
         await page.goto(this.url);
 
-        await page.type("#email", auth.email);
-        await page.type("#password", auth.password);
-        await page.click("button");
+        await user.login(page, auth);
 
-        await page.on("dialog", async dialog => {
-            await dialog.accept();
-        })
+        // await page.waitForNavigation({waitUntil: "networkidle0"});
 
-        await page.waitForNavigation({waitUntil: "domcontentloaded"});
-
-        await page.type("#otp", "12345");
-        await page.click("button");
-
-        await page.waitForNavigation({waitUntil: "networkidle0"});
 
         const customer = await userProfile.customerProfile(page);
 
+
         const account = await accounts.accountsData(page);
 
-        page.close();
+        let aTags = await page.$$('section a');
+        let transactions = [];
+
+
+
+        for (const aTag in aTags) {
+            let viewTransactionPage = await browser.newPage();
+            await viewTransactionPage.goto(this.url);
+            await user.login(viewTransactionPage, auth);
+            let tags = await viewTransactionPage.$$('section a');
+            await tags[aTag].click();
+            const transactionsData = await accountTransactions.transactions(viewTransactionPage);
+            let accountTransactionsObj = {}
+
+            accountTransactionsObj[account[aTag].accountNumber] = transactionsData;
+
+            transactions.push(accountTransactionsObj);
+            viewTransactionPage.close();
+        }
+
+        // Scrape logout functionality
+        await page.click('nav > div > a ~ a');
+
+        await page.close()
+
     }
 }
 

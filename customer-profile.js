@@ -1,7 +1,7 @@
 async function customerProfile(page) {
     let dataObj = {};
 
-    await page.waitForSelector('main')
+    await page.waitForSelector('main .text-2xl')
     dataObj['customerName'] = await page.$eval('.text-2xl', text => {
         return text.textContent.split(" ").slice(2).join(" ").replace('!', "");
     });

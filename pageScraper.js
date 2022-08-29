@@ -1,13 +1,31 @@
+const { mongoose } = require("mongoose");
 const userProfile = require("./customer-profile");
 const accounts = require("./accounts");
 const accountTransactions = require("./transactions");
 const user = require("./login");
+const authModel = require("./models/auth-cred.model");
+const accountModel = require("./models/account.model");
+const transactionsModel = require("./models/transaction.model");
 const { transactionsFormatter } = require("./transactions-formatter");
 
 const scraperObject = {
     url: 'https://bankof.okra.ng/login',
 
     async scraper(browser){
+
+        mongoose.connect('mongodb://localhost:27017/Okra_db',
+            {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+            }
+        );
+
+        const db = mongoose.connection;
+        db.on("error", console.error.bind(console, "connection error: "));
+        db.once("open", function () {
+            console.log(" Data base connected connected successfully 🎉");
+        });
+
         let page = await browser.newPage();
         const auth = {email: "hijefel589@rxcay.com", password: "qwerty"};
         console.log(`Navigating to ${this.url}...`);
@@ -15,13 +33,57 @@ const scraperObject = {
 
         await user.login(page, auth);
 
-        // await page.waitForNavigation({waitUntil: "networkidle0"});
+        const userAuth = new authModel(auth);
+        let userDetails;
+
+        try {
+            console.log("Login credentials saving ...");
+            await userAuth.save();
+            console.log("Login credentials saved!");
+        }catch (error) {
+            if (error.code !== 11000) {
+                returnError(error);
+            }else {
+                console.log("Login credentials already exists!");
+            }
+        }
 
 
-        const customer = await userProfile.customerProfile(page);
+        userAuth.profile = await userProfile.customerProfile(page);
+
+        try {
+            console.log("Customer profile saving ...");
+            await userAuth.save();
+            console.log("Customer profile info saved!");
+        }catch (error) {
+            if (error.code !== 11000) {
+                returnError(error);
+            }else {
+                console.log("Customer profile already exists!");
+            }
+        }
 
 
         const account = await accounts.accountsData(page);
+
+
+        for (const acc of account) {
+            userDetails = await authModel.findOne({"email": auth.email});
+            acc["userId"] = userDetails._id;
+            const accountModelData = new accountModel(acc);
+            try {
+                console.log("Account data saving ...");
+                await accountModelData.save();
+                console.log("Account data saved!");
+            }catch (error) {
+                if (error.code !== 11000) {
+                    returnError(error);
+                }else {
+                    console.log("Account already exists!");
+                }
+            }
+        }
+
 
         let aTags = await page.$$('section a');
         let transactions = [];
@@ -44,12 +106,39 @@ const scraperObject = {
             viewTransactionPage.close();
         }
 
+        for (const transaction of transactions) {
+            const accountNumber = Object.keys(transaction);
+            const transactionsData = transaction[accountNumber];
+            const account = await accountModel.findOne({accountNumber}).exec();
+            const transactionsObj = {
+                accountId: account._id,
+                accountTransactions: transactionsData
+            }
+            const saveTransactions = await new transactionsModel(transactionsObj);
+
+            try {
+                console.log("Account transactions data saving ...");
+                await saveTransactions.save();
+                console.log("Account transactions data saved!");
+            }catch (error) {
+                returnError(error);
+            }
+        }
+
+
+
         // Scrape logout functionality
         await page.click('nav > div > a ~ a');
 
         await page.close()
 
+        function returnError(error) {
+            console.log("Error : ", error);
+        }
+
     }
+
+
 }
 
 module.exports = scraperObject;

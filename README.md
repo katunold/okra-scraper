@@ -1,12 +1,12 @@
 # okra-scraper
 
-#####This node application scrapes a banks web-page and saves the data scraped to a mongodb database
+##### This node application scrapes a banks web-page and saves the data scraped to a mongodb database
 
-####Prerequisites
+#### Prerequisites
 - mongodb installation
 - nodejs(v17.6.0)
 
-###Steps to test it out
+### Steps to test it out
 
 1. Clone the repository
 ``https://github.com/katunold/okra-scraper.git``

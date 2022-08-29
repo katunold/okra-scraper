@@ -2,6 +2,7 @@ const userProfile = require("./customer-profile");
 const accounts = require("./accounts");
 const accountTransactions = require("./transactions");
 const user = require("./login");
+const { transactionsFormatter } = require("./transactions-formatter");
 
 const scraperObject = {
     url: 'https://bankof.okra.ng/login',
@@ -33,7 +34,8 @@ const scraperObject = {
             await user.login(viewTransactionPage, auth);
             let tags = await viewTransactionPage.$$('section a');
             await tags[aTag].click();
-            const transactionsData = await accountTransactions.transactions(viewTransactionPage);
+            let transactionsData = await accountTransactions.transactions(viewTransactionPage);
+            transactionsData = transactionsFormatter(transactionsData);
             let accountTransactionsObj = {}
 
             accountTransactionsObj[account[aTag].accountNumber] = transactionsData;

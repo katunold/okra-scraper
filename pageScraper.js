@@ -1,4 +1,5 @@
 const { mongoose } = require("mongoose");
+require('dotenv').config();
 const userProfile = require("./customer-profile");
 const accounts = require("./accounts");
 const accountTransactions = require("./transactions");
@@ -12,8 +13,8 @@ const scraperObject = {
     url: 'https://bankof.okra.ng/login',
 
     async scraper(browser){
-
-        mongoose.connect('mongodb://localhost:27017/Okra_db',
+        const url = process.env.mongo_url
+        mongoose.connect(url,
             {
                 useNewUrlParser: true,
                 useUnifiedTopology: true
@@ -125,12 +126,14 @@ const scraperObject = {
             }
         }
 
-
-
         // Scrape logout functionality
         await page.click('nav > div > a ~ a');
 
-        await page.close()
+        await page.close();
+
+        console.log("🎉🎊 Scraping completed successfully 🎉🎊");
+
+        process.exit();
 
         function returnError(error) {
             console.log("Error : ", error);

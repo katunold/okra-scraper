@@ -31,7 +31,7 @@ const AuthCredModel = new Schema({
         type: String,
         required: true
     },
-    profile: CustomerModel
+    customer: CustomerModel
 })
 
 const Auth = mongoose.model("auth", AuthCredModel);

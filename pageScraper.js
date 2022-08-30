@@ -50,7 +50,7 @@ const scraperObject = {
         }
 
 
-        userAuth.profile = await userProfile.customerProfile(page);
+        userAuth.customer = await userProfile.customerProfile(page);
 
         try {
             console.log("Customer profile saving ...");

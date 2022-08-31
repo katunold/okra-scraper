@@ -1,6 +1,6 @@
 # okra-scraper
 
-##### This node application scrapes a banks web-page and saves the data scraped to a mongodb database
+##### This node script scrapes a banks web-page and saves the data scraped to a mongodb database
 
 #### Prerequisites
 - mongodb installation

@@ -7,13 +7,14 @@ const user = require("./login");
 const authModel = require("./models/auth-cred.model");
 const accountModel = require("./models/account.model");
 const transactionsModel = require("./models/transaction.model");
+const customerModel = require("./models/customer.model");
 const { transactionsFormatter } = require("./transactions-formatter");
 
 const scraperObject = {
     url: 'https://bankof.okra.ng/login',
 
     async scraper(browser){
-        const url = process.env.mongo_url
+        const url = process.env.mongoAtlas
         mongoose.connect(url,
             {
                 useNewUrlParser: true,
@@ -49,12 +50,16 @@ const scraperObject = {
             }
         }
 
+        userDetails = await authModel.findOne({"email": auth.email});
 
-        userAuth.customer = await userProfile.customerProfile(page);
+        const customer = await userProfile.customerProfile(page);
+        customer["userId"] = userDetails._id;
+
+        const customerDataModel = new customerModel(customer);
 
         try {
             console.log("Customer profile saving ...");
-            await userAuth.save();
+            await customerDataModel.save();
             console.log("Customer profile info saved!");
         }catch (error) {
             if (error.code !== 11000) {
@@ -64,12 +69,9 @@ const scraperObject = {
             }
         }
 
-
         const account = await accounts.accountsData(page);
 
-
         for (const acc of account) {
-            userDetails = await authModel.findOne({"email": auth.email});
             acc["userId"] = userDetails._id;
             const accountModelData = new accountModel(acc);
             try {
@@ -85,11 +87,8 @@ const scraperObject = {
             }
         }
 
-
         let aTags = await page.$$('section a');
         let transactions = [];
-
-
 
         for (const aTag in aTags) {
             let viewTransactionPage = await browser.newPage();

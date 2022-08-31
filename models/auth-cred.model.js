@@ -1,26 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const CustomerModel = new Schema({
-    address: {
-        type: String,
-        required: true,
-    },
-    bvn: {
-        type: String,
-        unique: true,
-        required: true
-    },
-    phone: {
-        type: String,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true
-    }
-})
-
 const AuthCredModel = new Schema({
     email: {
         type: String,
@@ -30,8 +10,7 @@ const AuthCredModel = new Schema({
     password: {
         type: String,
         required: true
-    },
-    customer: CustomerModel
+    }
 })
 
 const Auth = mongoose.model("auth", AuthCredModel);

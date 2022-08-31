@@ -14,7 +14,7 @@ const scraperObject = {
     url: 'https://bankof.okra.ng/login',
 
     async scraper(browser){
-        const url = process.env.mongoAtlas
+        const url = process.env.mongo_url
         mongoose.connect(url,
             {
                 useNewUrlParser: true,
@@ -107,22 +107,27 @@ const scraperObject = {
         }
 
         for (const transaction of transactions) {
+            const transactionsArray = []
             const accountNumber = Object.keys(transaction);
             const transactionsData = transaction[accountNumber];
             const account = await accountModel.findOne({accountNumber}).exec();
-            const transactionsObj = {
-                accountId: account._id,
-                accountTransactions: transactionsData
-            }
-            const saveTransactions = await new transactionsModel(transactionsObj);
+
+            transactionsData.forEach(transaction => {
+                const transactionsObj = {
+                    accountId: account._id,
+                    ...transaction
+                }
+                transactionsArray.push(new transactionsModel(transactionsObj))
+            })
 
             try {
                 console.log("Account transactions data saving ...");
-                await saveTransactions.save();
+                await Promise.all(transactionsArray.map(async transaction => await transaction.save()))
                 console.log("Account transactions data saved!");
             }catch (error) {
                 returnError(error);
             }
+
         }
 
         // Scrape logout functionality
